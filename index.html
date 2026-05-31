@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>毛孩通譯機</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Space+Mono:wght@400;700&display=swap');
+  :root{--cream:#F5F0E8;--warm:#E8DDD0;--dark:#2C1F1A;--accent:#D47A3E;--accent2:#7AA5A0;--light:#9B8577}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--cream);color:var(--dark);font-family:'Noto Serif TC',serif;min-height:100vh;padding:2rem 1rem 5rem;display:flex;flex-direction:column;align-items:center}
+  .wrap{width:100%;max-width:560px}
+  header{text-align:center;margin-bottom:2rem}
+  .logo{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.3em;color:var(--light);text-transform:uppercase;margin-bottom:6px}
+  h1{font-size:clamp(1.8rem,7vw,2.8rem);font-weight:700}
+  h1 span{color:var(--accent)}
+  .sub{font-size:0.85rem;color:var(--light);margin-top:6px;line-height:1.7}
+  .card{background:#fff;border-radius:20px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 20px rgba(44,31,26,0.07)}
+  .lbl{font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;color:var(--light);text-transform:uppercase;margin-bottom:6px;display:block}
+  .api-row{display:flex;gap:8px}
+  .api-row input{flex:1;min-width:0;border:1.5px solid var(--warm);border-radius:10px;padding:0.7rem 1rem;font-size:1rem;font-family:'Space Mono',monospace;color:var(--dark);background:var(--cream);outline:none;transition:border-color 0.2s}
+  .api-row input:focus{border-color:var(--accent)}
+  .btn-save{background:var(--dark);color:#fff;border:none;border-radius:10px;padding:0.7rem 1.1rem;font-family:'Space Mono',monospace;font-size:0.78rem;cursor:pointer;white-space:nowrap;transition:background 0.2s}
+  .btn-save:active{background:var(--accent)}
+  .hint{font-size:0.75rem;color:var(--light);margin-top:6px;line-height:1.7}
+  .hint a{color:var(--accent);text-decoration:none}
+  .key-saved{font-size:0.75rem;color:var(--accent2);margin-top:6px;display:none}
+  .upload-zone{border:2px dashed var(--warm);border-radius:14px;padding:2rem 1rem;text-align:center;cursor:pointer;position:relative;background:var(--cream);transition:all 0.2s;margin-bottom:1rem}
+  .upload-zone:active,.upload-zone.drag{border-color:var(--accent);background:#FBF5EE}
+  .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;font-size:16px}
+  .uz-icon{font-size:2.2rem;margin-bottom:8px}
+  .uz-title{font-size:1rem;font-weight:700;margin-bottom:4px}
+  .uz-hint{font-size:0.8rem;color:var(--light);line-height:1.6}
+  .preview{display:none;border-radius:12px;overflow:hidden;background:var(--dark);margin-bottom:1rem}
+  .preview video{width:100%;max-height:230px;object-fit:contain;display:block}
+  .preview-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(0,0,0,0.45)}
+  .preview-name{font-size:0.72rem;font-family:'Space Mono',monospace;color:rgba(255,255,255,0.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:8px}
+  .btn-reselect{background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.72rem;cursor:pointer;font-family:'Space Mono',monospace}
+  .analyze-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:14px;padding:1rem;font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .analyze-btn:active:not(:disabled){background:#C06A2E;transform:scale(0.98)}
+  .analyze-btn:disabled{opacity:0.4;cursor:not-allowed}
+  .progress{display:none;margin-top:1rem}
+  .prog-step{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:0.85rem;color:var(--light);border-bottom:1px solid var(--warm)}
+  .prog-step:last-of-type{border:none}
+  .dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;background:var(--warm);color:var(--light);transition:all 0.3s}
+  .dot.active{background:var(--accent);color:#fff;animation:spin 1s linear infinite}
+  .dot.done{background:var(--accent2);color:#fff}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .prog-bar{height:4px;background:var(--warm);border-radius:4px;margin-top:12px;overflow:hidden}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:4px;transition:width 0.5s ease;width:0}
+  .error{display:none;background:#FDF0EE;border:1.5px solid #E8A090;border-radius:12px;padding:10px 14px;font-size:0.85rem;color:#C05040;margin-top:12px;line-height:1.6}
+  .result{display:none;margin-top:1rem}
+  .result-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .pet-badge{background:#FAECE7;color:#712B13;font-family:'Space Mono',monospace;font-size:0.68rem;padding:5px 12px;border-radius:20px;white-space:nowrap;font-weight:700}
+  .conf-wrap{flex:1}
+  .conf-lbl{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--light);font-family:'Space Mono',monospace;margin-bottom:4px}
+  .conf-bar{height:5px;background:var(--warm);border-radius:5px;overflow:hidden}
+  .conf-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:5px;transition:width 1s ease;width:0}
+  .r-block{background:var(--cream);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .r-block.accent-left{border-left:4px solid var(--accent);border-radius:12px}
+  .r-block.accent2-left{border-left:4px solid var(--accent2);border-radius:12px}
+  .r-lbl{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.15em;color:var(--light);text-transform:uppercase;margin-bottom:6px}
+  .r-val{font-size:0.88rem;color:var(--dark);line-height:1.7}
+  .emotion-val{font-size:1.3rem;font-weight:700;color:var(--dark)}
+  .r-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .trans-block{background:var(--dark);color:var(--cream);border-radius:12px;padding:14px;margin-bottom:10px}
+  .trans-lbl{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.15em;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+  .trans-val{font-size:0.95rem;line-height:1.85}
+  .reset-btn{width:100%;margin-top:12px;background:none;border:1.5px solid var(--warm);border-radius:12px;padding:0.75rem;font-family:'Noto Serif TC',serif;font-size:0.9rem;color:var(--light);cursor:pointer}
+  .reset-btn:active{border-color:var(--accent);color:var(--accent)}
+  footer{text-align:center;margin-top:2rem;font-size:0.7rem;color:var(--light);font-family:'Space Mono',monospace;line-height:1.8}
+  @media(max-width:380px){.r-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">🐾 Pet Translator</div>
+    <h1>毛孩<span>通譯機</span></h1>
+    <p class="sub">上傳影片，AI 分析動作與叫聲<br>告訴你牠在說什麼</p>
+  </header>
+
+  <div class="card">
+    <span class="lbl">Gemini API Key</span>
+    <div class="api-row">
+      <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
+      <button class="btn-save" onclick="saveKey()">儲存</button>
+    </div>
+    <div class="hint">免費取得 → <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br>每次分析約 NT$0.03，Key 只存在你的瀏覽器</div>
+    <div class="key-saved" id="keySaved">✓ Key 已儲存</div>
+  </div>
+
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" accept="video/*" id="videoInput" onchange="handleFile(this.files[0])">
+    <div class="uz-icon">🎬</div>
+    <div class="uz-title">點擊上傳或直接拍攝</div>
+    <div class="uz-hint">MP4、MOV 等格式均可<br>建議 5–15 秒，畫面清晰為佳</div>
+  </div>
+
+  <div class="preview" id="preview">
+    <video id="vid" controls playsinline muted></video>
+    <div class="preview-bar">
+      <div class="preview-name" id="fname"></div>
+      <button class="btn-reselect" onclick="removeVideo()">重選</button>
+    </div>
+  </div>
+
+  <button class="analyze-btn" id="analyzeBtn" onclick="analyze()" disabled>🔍 開始分析</button>
+
+  <div class="progress" id="prog">
+    <div class="prog-step"><div class="dot" id="d1">1</div><span id="t1">準備上傳影片...</span></div>
+    <div class="prog-step"><div class="dot" id="d2">2</div><span id="t2">AI 觀察動作與聲音...</span></div>
+    <div class="prog-step"><div class="dot" id="d3">3</div><span id="t3">整理翻譯結果...</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="pf"></div></div>
+  </div>
+
+  <div class="error" id="err"></div>
+
+  <div class="result" id="result">
+    <div class="result-head">
+      <div class="pet-badge" id="badge">偵測中</div>
+      <div class="conf-wrap">
+        <div class="conf-lbl"><span>分析可信度</span><span id="confNum">—</span></div>
+        <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div>
+      </div>
+    </div>
+    <div class="r-block accent-left">
+      <div class="r-lbl">🧠 當下情緒</div>
+      <div class="emotion-val" id="emotion">—</div>
+    </div>
+    <div class="r-grid">
+      <div class="r-block"><div class="r-lbl">👀 動作觀察</div><div class="r-val" id="body">—</div></div>
+      <div class="r-block"><div class="r-lbl">🔊 聲音特徵</div><div class="r-val" id="sound">—</div></div>
+    </div>
+    <div class="trans-block">
+      <div class="trans-lbl">📢 牠在說...</div>
+      <div class="trans-val" id="trans">—</div>
+    </div>
+    <div class="r-block accent2-left">
+      <div class="r-lbl">💡 建議回應</div>
+      <div class="r-val" id="sug">—</div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">🔄 重新分析</button>
+  </div>
+
+  <footer>Gemini 2.5 Flash-Lite · 影片 48 小時後自動從 Google 刪除<br>Key 只存在你的瀏覽器，不會上傳至任何伺服器</footer>
+</div>
+
+<script>
+let videoFile=null,savedKey='';
+try{savedKey=localStorage.getItem('gemini_key')||'';}catch(e){}
+if(savedKey){document.getElementById('apiKey').value=savedKey;document.getElementById('keySaved').style.display='block';}
+
+function saveKey(){
+  const k=document.getElementById('apiKey').value.trim();
+  if(!k)return;
+  savedKey=k;
+  try{localStorage.setItem('gemini_key',k);}catch(e){}
+  const b=document.querySelector('.btn-save');
+  b.textContent='✓ 已存';b.style.background='#7AA5A0';
+  document.getElementById('keySaved').style.display='block';
+  setTimeout(()=>{b.textContent='儲存';b.style.background='';},2000);
+}
+
+const uz=document.getElementById('uploadZone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('video/'))handleFile(f);});
+
+function handleFile(f){
+  if(!f)return;videoFile=f;
+  document.getElementById('vid').src=URL.createObjectURL(f);
+  document.getElementById('fname').textContent=f.name+' · '+(f.size/1024/1024).toFixed(1)+'MB';
+  document.getElementById('preview').style.display='block';
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('analyzeBtn').disabled=false;
+  clearUI();
+}
+
+function removeVideo(){
+  videoFile=null;
+  document.getElementById('vid').src='';
+  document.getElementById('preview').style.display='none';
+  document.getElementById('uploadZone').style.display='block';
+  document.getElementById('videoInput').value='';
+  document.getElementById('analyzeBtn').disabled=true;
+  clearUI();
+}
+
+function clearUI(){
+  document.getElementById('result').style.display='none';
+  document.getElementById('err').style.display='none';
+  document.getElementById('prog').style.display='none';
+}
+
+function dot(n,s){
+  const d=document.getElementById('d'+n);
+  d.className='dot'+(s?' '+s:'');
+  d.textContent=s==='done'?'✓':s==='active'?'↻':n;
+}
+function txt(n,t){document.getElementById('t'+n).textContent=t;}
+function pct(p){document.getElementById('pf').style.width=p+'%';}
+
+function showErr(msg){
+  const e=document.getElementById('err');
+  e.textContent=msg;e.style.display='block';
+  document.getElementById('prog').style.display='none';
+  document.getElementById('analyzeBtn').disabled=false;
+}
+
+async function analyze(){
+  const key=document.getElementById('apiKey').value.trim()||savedKey;
+  if(!key){showErr('請先輸入 Gemini API Key');return;}
+  if(!videoFile){showErr('請先上傳影片');return;}
+  document.getElementById('analyzeBtn').disabled=true;
+  document.getElementById('err').style.display='none';
+  document.getElementById('result').style.display='none';
+  document.getElementById('prog').style.display='block';
+  dot(1,'active');dot(2,'');dot(3,'');
+  txt(1,'上傳影片中...');pct(5);
+
+  try{
+    const mime=videoFile.type||'video/mp4';
+    const ir=await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${key}`,{
+      method:'POST',
+      headers:{'X-Goog-Upload-Protocol':'resumable','X-Goog-Upload-Command':'start',
+        'X-Goog-Upload-Header-Content-Length':videoFile.size,
+        'X-Goog-Upload-Header-Content-Type':mime,'Content-Type':'application/json'},
+      body:JSON.stringify({file:{display_name:videoFile.name}})
+    });
+    if(!ir.ok){const e=await ir.json().catch(()=>({}));throw new Error(e.error?.message||'上傳初始化失敗');}
+    const ru=ir.headers.get('X-Goog-Upload-URL');
+    if(!ru)throw new Error('無法取得上傳位址，請確認 API Key 是否正確');
+    pct(15);
+
+    const ur=await fetch(ru,{
+      method:'POST',
+      headers:{'Content-Length':videoFile.size,'X-Goog-Upload-Offset':'0','X-Goog-Upload-Command':'upload, finalize'},
+      body:videoFile
+    });
+    if(!ur.ok){const e=await ur.json().catch(()=>({}));throw new Error(e.error?.message||'影片上傳失敗');}
+    const ud=await ur.json();
+    const fn=ud.file?.name;let fu=ud.file?.uri,fs=ud.file?.state;
+    if(!fn)throw new Error('上傳回應異常，請重試');
+
+    dot(1,'done');txt(1,'影片上傳完成');
+    dot(2,'active');txt(2,'等待影片處理...');pct(35);
+
+    let tries=0;
+    while(fs==='PROCESSING'&&tries<25){
+      await new Promise(r=>setTimeout(r,2000));
+      const ck=await fetch(`https://generativelanguage.googleapis.com/v1beta/${fn}?key=${key}`);
+      const cd=await ck.json();fs=cd.file?.state;fu=cd.file?.uri||fu;tries++;
+      pct(35+tries*2);
+    }
+    if(fs==='FAILED')throw new Error('影片處理失敗，請換個檔案試試');
+
+    txt(2,'AI 正在分析...');pct(65);
+
+    const prompt=`你是動物行為學家，請觀察影片並只回傳 JSON（不加任何其他文字）：
+{"animal":"貓或狗或無法判斷","confidence":0到100整數,"emotion":"情緒2到6字","body_language":"動作觀察2到3句","sound":"聲音特徵1到2句若無聲音請說明","translation":"牠想說的話繁體中文第一人稱2到4句","suggestion":"飼主建議回應1到3句"}`;
+
+    const ar=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[{text:prompt},{file_data:{mime_type:mime,file_uri:fu}}]}],
+        generationConfig:{temperature:0.4,maxOutputTokens:800,thinkingConfig:{thinkingBudget:0}}
+      })
+    });
+    if(!ar.ok){const e=await ar.json().catch(()=>({}));throw new Error(e.error?.message||'AI 分析失敗');}
+    const ad=await ar.json();
+    const raw=ad.candidates?.[0]?.content?.parts?.[0]?.text||'';
+
+    dot(2,'done');txt(2,'分析完成');
+    dot(3,'active');txt(3,'整理翻譯結果...');pct(90);
+
+    let r;
+    try{r=JSON.parse(raw.replace(/```json|```/g,'').trim());}
+    catch{throw new Error('AI 回應格式有誤，請再試一次');}
+
+    dot(3,'done');txt(3,'翻譯完成！');pct(100);
+    await new Promise(res=>setTimeout(res,400));
+    document.getElementById('prog').style.display='none';
+    showResult(r);
+
+    fetch(`https://generativelanguage.googleapis.com/v1beta/${fn}?key=${key}`,{method:'DELETE'}).catch(()=>{});
+
+  }catch(err){
+    let m=err.message||'發生未知錯誤';
+    if(m.includes('API_KEY_INVALID')||m.includes('invalid'))m='❌ API Key 無效，請重新確認';
+    else if(m.includes('quota')||m.includes('429'))m='❌ 免費額度已用完，請稍後再試';
+    else m='❌ '+m;
+    showErr(m);
+  }
+}
+
+function showResult(r){
+  const a=r.animal;
+  document.getElementById('badge').textContent=a==='貓'?'🐱 貓咪':a==='狗'?'🐶 狗狗':'🐾 動物';
+  const c=Math.min(100,Math.max(0,Math.round(Number(r.confidence)||0)));
+  document.getElementById('confNum').textContent=c+'%';
+  setTimeout(()=>{document.getElementById('confFill').style.width=c+'%';},100);
+  document.getElementById('emotion').textContent=r.emotion||'—';
+  document.getElementById('body').textContent=r.body_language||'—';
+  document.getElementById('sound').textContent=r.sound||'—';
+  document.getElementById('trans').textContent=r.translation||'—';
+  document.getElementById('sug').textContent=r.suggestion||'—';
+  document.getElementById('result').style.display='block';
+  document.getElementById('analyzeBtn').disabled=false;
+  setTimeout(()=>document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function resetAll(){removeVideo();}
+</script>
+</body>
+</html>
