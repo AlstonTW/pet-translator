@@ -9,23 +9,27 @@
   :root{--cream:#F5F0E8;--warm:#E8DDD0;--dark:#2C1F1A;--accent:#D47A3E;--accent2:#7AA5A0;--light:#9B8577}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{background:var(--cream);color:var(--dark);font-family:'Noto Serif TC',serif;min-height:100vh;padding:2rem 1rem 5rem;display:flex;flex-direction:column;align-items:center}
-  .wrap{width:100%;max-width:560px}
+  .wrap{width:100%;max-width:560px;position:relative}
+  .topbar{display:flex;align-items:center;justify-content:flex-end;margin-bottom:1.5rem}
+  .gear-btn{background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--light);padding:4px;border-radius:8px}
+  .gear-btn:active{color:var(--accent)}
+  .setup-overlay{display:none;position:fixed;inset:0;background:rgba(44,31,26,0.55);z-index:100;align-items:center;justify-content:center;padding:1.5rem}
+  .setup-overlay.show{display:flex}
+  .setup-box{background:var(--cream);border-radius:20px;padding:2rem 1.5rem;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,0.18)}
+  .setup-title{font-size:1.2rem;font-weight:700;margin-bottom:6px}
+  .setup-sub{font-size:0.82rem;color:var(--light);margin-bottom:1.25rem;line-height:1.7}
+  .setup-sub a{color:var(--accent);text-decoration:none}
+  .setup-input{width:100%;border:1.5px solid var(--warm);border-radius:10px;padding:0.75rem 1rem;font-size:1rem;font-family:'Space Mono',monospace;color:var(--dark);background:#fff;outline:none;margin-bottom:0.85rem;transition:border-color 0.2s}
+  .setup-input:focus{border-color:var(--accent)}
+  .setup-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.85rem;font-family:'Noto Serif TC',serif;font-size:1rem;font-weight:700;cursor:pointer}
+  .setup-btn:active{background:#C06A2E}
+  .setup-err{font-size:0.8rem;color:#C05040;margin-bottom:0.75rem;display:none}
   header{text-align:center;margin-bottom:2rem}
   .logo{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.3em;color:var(--light);text-transform:uppercase;margin-bottom:6px}
   h1{font-size:clamp(1.8rem,7vw,2.8rem);font-weight:700}
   h1 span{color:var(--accent)}
   .sub{font-size:0.85rem;color:var(--light);margin-top:6px;line-height:1.7}
-  .card{background:#fff;border-radius:20px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 20px rgba(44,31,26,0.07)}
-  .lbl{font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;color:var(--light);text-transform:uppercase;margin-bottom:6px;display:block}
-  .api-row{display:flex;gap:8px}
-  .api-row input{flex:1;min-width:0;border:1.5px solid var(--warm);border-radius:10px;padding:0.7rem 1rem;font-size:1rem;font-family:'Space Mono',monospace;color:var(--dark);background:var(--cream);outline:none;transition:border-color 0.2s}
-  .api-row input:focus{border-color:var(--accent)}
-  .btn-save{background:var(--dark);color:#fff;border:none;border-radius:10px;padding:0.7rem 1.1rem;font-family:'Space Mono',monospace;font-size:0.78rem;cursor:pointer;white-space:nowrap;transition:background 0.2s}
-  .btn-save:active{background:var(--accent)}
-  .hint{font-size:0.75rem;color:var(--light);margin-top:6px;line-height:1.7}
-  .hint a{color:var(--accent);text-decoration:none}
-  .key-saved{font-size:0.75rem;color:var(--accent2);margin-top:6px;display:none}
-  .upload-zone{border:2px dashed var(--warm);border-radius:14px;padding:2rem 1rem;text-align:center;cursor:pointer;position:relative;background:var(--cream);transition:all 0.2s;margin-bottom:1rem}
+  .upload-zone{border:2px dashed var(--warm);border-radius:14px;padding:2rem 1rem;text-align:center;cursor:pointer;position:relative;background:#fff;transition:all 0.2s;margin-bottom:1rem}
   .upload-zone:active,.upload-zone.drag{border-color:var(--accent);background:#FBF5EE}
   .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;font-size:16px}
   .uz-icon{font-size:2.2rem;margin-bottom:8px}
@@ -35,14 +39,14 @@
   .preview video{width:100%;max-height:230px;object-fit:contain;display:block}
   .preview-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(0,0,0,0.45)}
   .preview-name{font-size:0.72rem;font-family:'Space Mono',monospace;color:rgba(255,255,255,0.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:8px}
-  .btn-reselect{background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.72rem;cursor:pointer;font-family:'Space Mono',monospace}
-  .analyze-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:14px;padding:1rem;font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn-sm{background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.72rem;cursor:pointer;font-family:'Space Mono',monospace}
+  .analyze-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:14px;padding:1rem;font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all 0.15s}
   .analyze-btn:active:not(:disabled){background:#C06A2E;transform:scale(0.98)}
   .analyze-btn:disabled{opacity:0.4;cursor:not-allowed}
   .progress{display:none;margin-top:1rem}
   .prog-step{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:0.85rem;color:var(--light);border-bottom:1px solid var(--warm)}
   .prog-step:last-of-type{border:none}
-  .dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;background:var(--warm);color:var(--light);transition:all 0.3s}
+  .dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;background:var(--warm);color:var(--light)}
   .dot.active{background:var(--accent);color:#fff;animation:spin 1s linear infinite}
   .dot.done{background:var(--accent2);color:#fff}
   @keyframes spin{to{transform:rotate(360deg)}}
@@ -56,9 +60,9 @@
   .conf-lbl{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--light);font-family:'Space Mono',monospace;margin-bottom:4px}
   .conf-bar{height:5px;background:var(--warm);border-radius:5px;overflow:hidden}
   .conf-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:5px;transition:width 1s ease;width:0}
-  .r-block{background:var(--cream);border-radius:12px;padding:12px 14px;margin-bottom:10px}
-  .r-block.accent-left{border-left:4px solid var(--accent);border-radius:12px}
-  .r-block.accent2-left{border-left:4px solid var(--accent2);border-radius:12px}
+  .r-block{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .r-block.al{border-left:4px solid var(--accent)}
+  .r-block.al2{border-left:4px solid var(--accent2)}
   .r-lbl{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.15em;color:var(--light);text-transform:uppercase;margin-bottom:6px}
   .r-val{font-size:0.88rem;color:var(--dark);line-height:1.7}
   .emotion-val{font-size:1.3rem;font-weight:700;color:var(--dark)}
@@ -73,22 +77,26 @@
 </style>
 </head>
 <body>
+
+<div class="setup-overlay" id="setupOverlay">
+  <div class="setup-box">
+    <div class="setup-title" id="setupTitle">歡迎使用毛孩通譯機 🐾</div>
+    <div class="setup-sub" id="setupSub">請先輸入 Gemini API Key 才能開始使用<br>免費取得 → <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br>每次分析約 NT$0.03，Key 只存在你的瀏覽器</div>
+    <div class="setup-err" id="setupErr">請輸入有效的 API Key</div>
+    <input type="password" class="setup-input" id="setupKey" placeholder="AIza..." autocomplete="off">
+    <button class="setup-btn" onclick="confirmKey()">儲存並開始使用</button>
+  </div>
+</div>
+
 <div class="wrap">
+  <div class="topbar">
+    <button class="gear-btn" onclick="openSettings()" title="設定 API Key">⚙️</button>
+  </div>
   <header>
     <div class="logo">🐾 Pet Translator</div>
     <h1>毛孩<span>通譯機</span></h1>
     <p class="sub">上傳影片，AI 分析動作與叫聲<br>告訴你牠在說什麼</p>
   </header>
-
-  <div class="card">
-    <span class="lbl">Gemini API Key</span>
-    <div class="api-row">
-      <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off">
-      <button class="btn-save" onclick="saveKey()">儲存</button>
-    </div>
-    <div class="hint">免費取得 → <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br>每次分析約 NT$0.03，Key 只存在你的瀏覽器</div>
-    <div class="key-saved" id="keySaved">✓ Key 已儲存</div>
-  </div>
 
   <div class="upload-zone" id="uploadZone">
     <input type="file" accept="video/*" id="videoInput" onchange="handleFile(this.files[0])">
@@ -101,7 +109,7 @@
     <video id="vid" controls playsinline muted></video>
     <div class="preview-bar">
       <div class="preview-name" id="fname"></div>
-      <button class="btn-reselect" onclick="removeVideo()">重選</button>
+      <button class="btn-sm" onclick="removeVideo()">重選</button>
     </div>
   </div>
 
@@ -124,7 +132,7 @@
         <div class="conf-bar"><div class="conf-fill" id="confFill"></div></div>
       </div>
     </div>
-    <div class="r-block accent-left">
+    <div class="r-block al">
       <div class="r-lbl">🧠 當下情緒</div>
       <div class="emotion-val" id="emotion">—</div>
     </div>
@@ -136,7 +144,7 @@
       <div class="trans-lbl">📢 牠在說...</div>
       <div class="trans-val" id="trans">—</div>
     </div>
-    <div class="r-block accent2-left">
+    <div class="r-block al2">
       <div class="r-lbl">💡 建議回應</div>
       <div class="r-val" id="sug">—</div>
     </div>
@@ -148,19 +156,36 @@
 
 <script>
 let videoFile=null,savedKey='';
-try{savedKey=localStorage.getItem('gemini_key')||'';}catch(e){}
-if(savedKey){document.getElementById('apiKey').value=savedKey;document.getElementById('keySaved').style.display='block';}
 
-function saveKey(){
-  const k=document.getElementById('apiKey').value.trim();
-  if(!k)return;
+function init(){
+  try{savedKey=localStorage.getItem('gemini_key')||'';}catch(e){}
+  if(!savedKey){
+    document.getElementById('setupTitle').textContent='歡迎使用毛孩通譯機 🐾';
+    document.getElementById('setupSub').innerHTML='請先輸入 Gemini API Key 才能開始使用<br>免費取得 → <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a><br>每次分析約 NT$0.03，Key 只存在你的瀏覽器';
+    document.getElementById('setupOverlay').classList.add('show');
+  }
+}
+
+function openSettings(){
+  document.getElementById('setupTitle').textContent='更換 API Key ⚙️';
+  document.getElementById('setupSub').innerHTML='輸入新的 Gemini API Key<br>免費取得 → <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>';
+  document.getElementById('setupKey').value='';
+  document.getElementById('setupErr').style.display='none';
+  document.getElementById('setupOverlay').classList.add('show');
+}
+
+function confirmKey(){
+  const k=document.getElementById('setupKey').value.trim();
+  if(!k||k.length<10){document.getElementById('setupErr').style.display='block';return;}
   savedKey=k;
   try{localStorage.setItem('gemini_key',k);}catch(e){}
-  const b=document.querySelector('.btn-save');
-  b.textContent='✓ 已存';b.style.background='#7AA5A0';
-  document.getElementById('keySaved').style.display='block';
-  setTimeout(()=>{b.textContent='儲存';b.style.background='';},2000);
+  document.getElementById('setupOverlay').classList.remove('show');
+  document.getElementById('setupKey').value='';
 }
+
+document.getElementById('setupOverlay').addEventListener('click',function(e){
+  if(e.target===this&&savedKey)this.classList.remove('show');
+});
 
 const uz=document.getElementById('uploadZone');
 uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
@@ -193,24 +218,18 @@ function clearUI(){
   document.getElementById('prog').style.display='none';
 }
 
-function dot(n,s){
-  const d=document.getElementById('d'+n);
-  d.className='dot'+(s?' '+s:'');
-  d.textContent=s==='done'?'✓':s==='active'?'↻':n;
-}
+function dot(n,s){const d=document.getElementById('d'+n);d.className='dot'+(s?' '+s:'');d.textContent=s==='done'?'✓':s==='active'?'↻':n;}
 function txt(n,t){document.getElementById('t'+n).textContent=t;}
 function pct(p){document.getElementById('pf').style.width=p+'%';}
 
 function showErr(msg){
-  const e=document.getElementById('err');
-  e.textContent=msg;e.style.display='block';
+  const e=document.getElementById('err');e.textContent=msg;e.style.display='block';
   document.getElementById('prog').style.display='none';
   document.getElementById('analyzeBtn').disabled=false;
 }
 
 async function analyze(){
-  const key=document.getElementById('apiKey').value.trim()||savedKey;
-  if(!key){showErr('請先輸入 Gemini API Key');return;}
+  if(!savedKey){openSettings();return;}
   if(!videoFile){showErr('請先上傳影片');return;}
   document.getElementById('analyzeBtn').disabled=true;
   document.getElementById('err').style.display='none';
@@ -221,7 +240,7 @@ async function analyze(){
 
   try{
     const mime=videoFile.type||'video/mp4';
-    const ir=await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${key}`,{
+    const ir=await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${savedKey}`,{
       method:'POST',
       headers:{'X-Goog-Upload-Protocol':'resumable','X-Goog-Upload-Command':'start',
         'X-Goog-Upload-Header-Content-Length':videoFile.size,
@@ -249,7 +268,7 @@ async function analyze(){
     let tries=0;
     while(fs==='PROCESSING'&&tries<25){
       await new Promise(r=>setTimeout(r,2000));
-      const ck=await fetch(`https://generativelanguage.googleapis.com/v1beta/${fn}?key=${key}`);
+      const ck=await fetch(`https://generativelanguage.googleapis.com/v1beta/${fn}?key=${savedKey}`);
       const cd=await ck.json();fs=cd.file?.state;fu=cd.file?.uri||fu;tries++;
       pct(35+tries*2);
     }
@@ -260,7 +279,7 @@ async function analyze(){
     const prompt=`你是動物行為學家，請觀察影片並只回傳 JSON（不加任何其他文字）：
 {"animal":"貓或狗或無法判斷","confidence":0到100整數,"emotion":"情緒2到6字","body_language":"動作觀察2到3句","sound":"聲音特徵1到2句若無聲音請說明","translation":"牠想說的話繁體中文第一人稱2到4句","suggestion":"飼主建議回應1到3句"}`;
 
-    const ar=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`,{
+    const ar=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${savedKey}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         contents:[{parts:[{text:prompt},{file_data:{mime_type:mime,file_uri:fu}}]}],
@@ -283,11 +302,11 @@ async function analyze(){
     document.getElementById('prog').style.display='none';
     showResult(r);
 
-    fetch(`https://generativelanguage.googleapis.com/v1beta/${fn}?key=${key}`,{method:'DELETE'}).catch(()=>{});
+    fetch(`https://generativelanguage.googleapis.com/v1beta/${fn}?key=${savedKey}`,{method:'DELETE'}).catch(()=>{});
 
   }catch(err){
     let m=err.message||'發生未知錯誤';
-    if(m.includes('API_KEY_INVALID')||m.includes('invalid'))m='❌ API Key 無效，請重新確認';
+    if(m.includes('API_KEY_INVALID')||m.includes('invalid'))m='❌ API Key 無效，請點右上角 ⚙️ 重新設定';
     else if(m.includes('quota')||m.includes('429'))m='❌ 免費額度已用完，請稍後再試';
     else m='❌ '+m;
     showErr(m);
@@ -311,6 +330,7 @@ function showResult(r){
 }
 
 function resetAll(){removeVideo();}
+init();
 </script>
 </body>
 </html>
