@@ -266,7 +266,7 @@ async function analyze(){
     dot(2,'active');txt(2,'等待影片處理...');pct(35);
 
     let tries=0;
-    while(fs!=='ACTIVE'&&tries<40){
+    while(fs!=='ACTIVE'&&tries<100){
       if(fs==='FAILED')throw new Error('影片處理失敗，請換個檔案試試');
       await new Promise(r=>setTimeout(r,3000));
       const ck=await fetch(`https://generativelanguage.googleapis.com/v1beta/${fn}?key=${savedKey}`);
@@ -274,7 +274,7 @@ async function analyze(){
       pct(Math.min(60, 35+tries*2));
       txt(2,'影片處理中... ('+Math.round(tries*3)+'s)');
     }
-    if(fs!=='ACTIVE')throw new Error('影片處理逾時，請重試或換個較短的影片');
+    if(fs!=='ACTIVE')throw new Error('影片處理逾時，請重試');
 
     txt(2,'AI 正在分析...');pct(65);
 
