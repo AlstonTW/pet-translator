@@ -236,47 +236,19 @@ async function analyze(){
   document.getElementById('result').style.display='none';
   document.getElementById('prog').style.display='block';
   dot(1,'active');dot(2,'');dot(3,'');
-  txt(1,'上傳影片中...');pct(5);
+  txt(1,'讀取影片中...');pct(5);
 
   try{
-    const mime=videoFile.type||'video/mp4';
-    const ir=await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${savedKey}`,{
-      method:'POST',
-      headers:{'X-Goog-Upload-Protocol':'resumable','X-Goog-Upload-Command':'start',
-        'X-Goog-Upload-Header-Content-Length':videoFile.size,
-        'X-Goog-Upload-Header-Content-Type':mime,'Content-Type':'application/json'},
-      body:JSON.stringify({file:{display_name:videoFile.name}})
+    const mime=videoFile.type||'video/quicktime';
+
+    const b64=await new Promise((res,rej)=>{
+      const rd=new FileReader();
+      rd.onload=()=>res(rd.result.split(',')[1]);
+      rd.onerror=rej;
+      rd.readAsDataURL(videoFile);
     });
-    if(!ir.ok){const e=await ir.json().catch(()=>({}));throw new Error(e.error?.message||'上傳初始化失敗');}
-    const ru=ir.headers.get('X-Goog-Upload-URL');
-    if(!ru)throw new Error('無法取得上傳位址，請確認 API Key 是否正確');
-    pct(15);
-
-    const ur=await fetch(ru,{
-      method:'POST',
-      headers:{'Content-Length':videoFile.size,'X-Goog-Upload-Offset':'0','X-Goog-Upload-Command':'upload, finalize'},
-      body:videoFile
-    });
-    if(!ur.ok){const e=await ur.json().catch(()=>({}));throw new Error(e.error?.message||'影片上傳失敗');}
-    const ud=await ur.json();
-    const fn=ud.file?.name;let fu=ud.file?.uri,fs=ud.file?.state;
-    if(!fn)throw new Error('上傳回應異常，請重試');
-
-    dot(1,'done');txt(1,'影片上傳完成');
-    dot(2,'active');txt(2,'等待影片處理...');pct(35);
-
-    let tries=0;
-    while(fs!=='ACTIVE'&&tries<100){
-      if(fs==='FAILED')throw new Error('影片處理失敗，請換個檔案試試');
-      await new Promise(r=>setTimeout(r,3000));
-      const ck=await fetch(`https://generativelanguage.googleapis.com/v1beta/${fn}?key=${savedKey}`);
-      const cd=await ck.json();fs=cd.file?.state;fu=cd.file?.uri||fu;tries++;
-      pct(Math.min(60, 35+tries*2));
-      txt(2,'影片處理中... ('+Math.round(tries*3)+'s)');
-    }
-    if(fs!=='ACTIVE')throw new Error('影片處理逾時，請重試');
-
-    txt(2,'AI 正在分析...');pct(65);
+    dot(1,'done');txt(1,'影片讀取完成');
+    dot(2,'active');txt(2,'傳送給 AI 分析中...');pct(40);
 
     const prompt=`你是動物行為學家，請觀察影片並只回傳 JSON（不加任何其他文字）：
 {"animal":"貓或狗或無法判斷","confidence":0到100整數,"emotion":"情緒2到6字","body_language":"動作觀察2到3句","sound":"聲音特徵1到2句若無聲音請說明","translation":"牠想說的話繁體中文第一人稱2到4句","suggestion":"飼主建議回應1到3句"}`;
@@ -284,7 +256,7 @@ async function analyze(){
     const ar=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${savedKey}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        contents:[{parts:[{text:prompt},{file_data:{mime_type:mime,file_uri:fu}}]}],
+        contents:[{parts:[{text:prompt},{inline_data:{mime_type:mime,data:b64}}]}],
         generationConfig:{temperature:0.4,maxOutputTokens:800,thinkingConfig:{thinkingBudget:0}}
       })
     });
@@ -303,8 +275,6 @@ async function analyze(){
     await new Promise(res=>setTimeout(res,400));
     document.getElementById('prog').style.display='none';
     showResult(r);
-
-    fetch(`https://generativelanguage.googleapis.com/v1beta/${fn}?key=${savedKey}`,{method:'DELETE'}).catch(()=>{});
 
   }catch(err){
     let m=err.message||'發生未知錯誤';
